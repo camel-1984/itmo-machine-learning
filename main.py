@@ -1,4 +1,4 @@
-from src.metrics import report
+from src.base import report
 
 # import src.syntax работает, но
 # заставляет писать полный путь при каждом вызове.
