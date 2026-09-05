@@ -1,23 +1,44 @@
-from nis import cat
-
-import numpy as np
 import pandas as pd
+import numpy as np
+
+# pandas объектно-ориентирован — почти всё метод.
+df.sum()  df.dropna()  s.isna()  s.astype()  s.str.strip()
+# Функций модуля мало, и они трёх видов: создание + объединение + pd.isna()
+pd.read_csv, pd.to_numeric, pd.to_datetime, pd.DataFrame
+
+# numpy функционален — почти всё np.*. (функция модуля)
+np.isfinite(a)  np.log(a)  np.where(m)  np.diff(a)  np.concatenate([a, b])
+# Методов у ndarray мало, и они про сам массив, а не про математику:
+a.sum()  a.mean()  a.max()  a.reshape()  a.astype()  a.copy()  a.T  a.argmax()
 
 # ============================================================
 #  1. ИЕРАРХИЯ ТИПОВ
 # ============================================================
 
 # DataFrame = набор Series
-# Series    = ndarray + индекс (метки строк)
-# ndarray   = плотный блок памяти одного типа
+# Series    = ndarray + индекс (метки строк) (ряд)
+# ndarray   = плотный блок памяти одного типа (n dimensional)
 
 df = pd.read_csv("data.csv")     # pandas.DataFrame
 df["price"]                      # pandas.Series  — ОДИН столбец
 df[["price", "area"]]            # DataFrame      — несколько (двойные скобки)
 df["price"].to_numpy()           # numpy.ndarray  — массив
 
-# np.array — функция (конструктор)
+# np.array — функция (конструктор) copy=True по умолчанию
 # np.ndarray — тип того, что она создаёт
+
+a = np.array([1., 2., 3.])
+len(a)      # 3
+a.size      # 3
+a.shape     # (3,)
+
+m = np.array([[1, 2, 3],
+              [4, 5, 6]])
+
+len(m)      # 2 ← длина первой оси (число строк)
+m.size      # 6 ← всего элементов
+m.shape     # (2, 3)
+m.ndim      # 2
 
 # ============================================================
 #  2. PANDAS: ЗАГРУЗКА И ОСМОТР
@@ -26,19 +47,31 @@ df["price"].to_numpy()           # numpy.ndarray  — массив
 df = pd.read_csv("data.csv")
 df = pd.read_csv("data.csv", usecols=["price"])   # только нужные колонки
 
-df.head()      # первые строки
-df.shape       # (строк, столбцов)
-df.columns     # название колонок
+df.head()      # первые строки - df
+df.shape       # (строк, столбцов) - tuple
+df.columns     # название колонок - возвращает Index - хитрый массив с хеш таблицей
 
-df.dtypes      # тип КАЖДОЙ колонки
+df.dtypes      # тип КАЖДОЙ колонки - series
 # dtype определяется СОДЕРЖИМЫМ:
 # одна ячейка "n/a" → вся колонка станет object (строки) → арифметика не работает
 
-df.info()      # типы + сколько непустых
-df.describe()  # статистика по числовым
+df.info()      # типы + сколько непустых - void
+df.describe()  # статистика по числовым - df
 
 dupl = df.duplicated(keep="first").sum()
 # duplicated() - Series T/F
+df.sum()          # Series по колонкам
+df.sum().sum()    # одно число
+
+axis=k — это ось, которая исчезает. Работает для любой размерности:
+a.shape          # (2, 3, 4)
+a.sum(axis=1)    # (2, 4)  ← тройка убралась
+df_copy = df_copy[~blank.any(axis=1)].copy()
+# убрать ось строк все строки переходят в столбец ~blank в любом из значений строки
+
+df_copy[pos] = df_copy[pos].apply(lambda s: s.astype("string").str.strip()).replace("", pd.NA)
+# Правило: если метод есть у DataFrame — вызывай напрямую, .apply только когда его нет.
+
 
 # ============================================================
 #  3. PANDAS: ВЫБОРКА И ИНДЕКС
@@ -68,38 +101,53 @@ df.loc[df["price"].isna(), "price"] = df["price"].median()
 # все остальное вернет новый объект
 
 prices = pd.to_numeric(df["price"], errors="coerce")
+# сохраняет пришедший тип - есть дробные сделает все float64 и тд
+# возвращает тот же контейнер, что и был на входе
 # errors="raise" (по умолчанию) → ValueError на первом мусоре
 # errors="coerce" → мусор становится NaN, не падает
 
 pd.isna(a)
-# Nan None NaT что угодно
+# nan None NaT NA что угодно
+nan - numpy в pandas напечатет NaN принято nan
+NA и NaT - pandas
+pd.NA - не привязан к float заменяем на него когда string
+
+np.nan   # float-колонки, numpy-массивы — классика
+pd.NA    # nullable-типы: Int64, string, boolean
+pd.NaT   # datetime
+None     # object-колонки, Python-код
 
 .str - строки
 .cat - категориональные данные
 .dt - дата время
-# это называется "accessor" (аксессор/накопитель методов).
-# вне pd np не существует
-# необходимо юзать с Series чтобы выполнить операцию нужную
+# Это называется "accessor" (аксессор/накопитель методов).a
+# Вне pd np не существует
+# необходимо юзать с Series, чтобы выполнить операцию нужную
 
 blank = market.str.strip() == ""
 non_valid = market.isna() | blank
 #.str.strip() убирает пробелы по краям возвращает series, дальше скалярное сравнение с пустой строкой.
-# astype(str) нужен, чтобы .str не спотыкался, если в колонке смешаны типы.
+astype(str) # нужен, чтобы .str не спотыкался, если в колонке смешаны типы.
 # .str работает только с Series
 
 parsed = pd.to_datetime(date, format="%Y-%m-%d", errors="coerce")
 # преобразовывает object в datetime
 
-# Когда в [] передаётся булев DataFrame а не Series, pandas делает не фильтрацию строк, а поэлементное маскирование: г
-# де True — значение остаётся, где False — на его место ставится NaN.
+# Когда в [] передаётся булев DataFrame а не Series, pandas делает не фильтрацию строк, а поэлементное маскирование:
+# где True — значение остаётся, где False — на его место ставится NaN.
+
+[col for col in needed if col not in df.columns]   # O(n × m)
+needed - set(df.columns)                            # O(n + m)
+# разность сетов быстрее генератора списка из-за hash table
 
 
 for col in pos:
     df[col] = df[col].str.split().str.join(" ")
-
-df[pos] = df[pos].apply(lambda s: s.str.split().str.join(" "))
-
 #эквивалентно
+df[pos] = df[pos].apply(lambda s: s.str.split().str.join(" "))
+# apply медленнее чем pd метод
+
+# Удаление строк из DataFrame — операция над всей таблицей, её нельзя собрать поколоночно.
 
 # ============================================================
 #  5. ПЕРЕХОД PANDAS → NUMPY
@@ -148,12 +196,18 @@ prices[(prices > 0) & (prices < 150)]
 (prices > 0).sum()        # СКОЛЬКО (True считается за 1)
 (prices > 0).mean()       # ДОЛЯ
 
+a = np.array([100., 110., 99.])
+np.diff(a)          # array([ 10., -11.]) - вернет пустой ndarray если меньше 2 элементов
+a[1:] - a[:-1]      # array([ 10., -11.])   ← идентично
+
 # ============================================================
 #  7. NaN И БЕСКОНЕЧНОСТЬ
 # ============================================================
 
 # NaN = Not a Number, только для float (в int-массиве невозможен)
 # type(np.nan) → float
+
+inf не приводится к Nan
 
 np.nan == np.nan     # False ← не равен даже себе
 np.nan > 0           # False
@@ -162,7 +216,7 @@ np.nan < 0           # False
 
 np.isnan(a)          # True где NaN
 np.isinf(a)          # True где +inf или -inf
-np.isfinite(a)       # True где нормальное число ← используй это
+np.isfinite(a)       # True, где нормальное число ← используй это
 # не работает со строками
 
 a = a[np.isfinite(a)]                  # чистка одной строкой
@@ -173,7 +227,12 @@ np.array([1.0]) / 0                    # inf (только warning, не иск�
 #  8. ПРИВЕДЕНИЕ ТИПОВ
 # ============================================================
 
-np.asarray(x, dtype=float)   # примет список/кортеж/массив; ValueError если не привести
+np.asarray(x, dtype=float)   # примет список/кортеж/массив - репрезентирующий числовое значение;
+# ValueError если не привести - пришел "aboba"
+np.array # копирует всегда (по умолчанию copy=True)
+np.asarray # копирует только если нужно
+# если только читаем а потом применяем маску (получим новый объект) нет смысла использовать array и сразу создвать новый объект
+
 x.astype(float)              # метод у ndarray; ВСЕГДА копия
 
 # float → float : NaN проходит спокойно (он и есть float)
@@ -216,19 +275,4 @@ b = a[2:5].copy() # явная копия
 df_copy = df.copy()
 # явная копия
 
-# у СПИСКА срез — копия, у ndarray — view. Не путать.
-
-# ============================================================
-#  10. ЧАСТЫЕ ОШИБКИ
-# ============================================================
-
-# and/or/not на массиве              → &, |, ~
-# (a > 0) & (a < 5) без скобок       → приоритет операторов
-# isinstance(arr, float)             → arr.dtype
-# a.sort() присвоили результат       → sort() возвращает None
-# astype(int) при наличии NaN        → мусор молча
-# сравнение NaN через ==             → всегда False, нужен isnan
-# срез ndarray считать копией        → это view
-# loc[0] после фильтрации            → KeyError, нужен reset_index
-# df["a"] vs df[["a"]]               → Series vs DataFrame
-# несовпадение shape                 → 80% всех ошибок, печатай .shape
+# у СПИСКА срез — копия, у ndarray — view.

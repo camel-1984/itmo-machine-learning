@@ -1,5 +1,43 @@
 import math
 
+result["is_valid"] = not result["missing_columns"] and all(
+        result[k] == 0 for k in ("duplicate_rows", "invalid_prices", "missing_markets", "invalid_dates")
+        # missing_columns - список пустой
+        # остальное int = 0
+
+if not missing_columns:      # «список пуст»
+if len(missing_columns) == 0 # то же самое, не принято (PEP 8)
+
+
+d = dict() # не принято
+d = {}
+
+dict = "что-то"
+x = dict()      # TypeError
+y = {}          # работает всегда
+
+list - []
+dict - {}
+tuple - ()
+str - ""
+set - исключение -> set()
+
+sorted(x)
+# возвращает новую коллекцию не меняет оригинал
+# sorted(words, key=len)  # по длине
+
+x.sort()
+# возвращает None меняет оригинал только с list
+
+x = (5)    # int, скобки просто группировка
+y = (5,)   # tuple из одного элемента
+z = 5,     # тоже tuple!
+# запятая — это оператор, который создаёт tuple.
+
+_, relative_change = ...
+# распаковка кортежа
+# через [1] - считается плохо
+
 s = "  hello    world"
 result = " ".join(s.split())
 print(result)  # "hello world"
@@ -35,6 +73,7 @@ def describe(data) -> str:
 
 # x is y — один ли это объект. Используется практически только с None, True, False.
 # x == y — равны ли значения. Всё остальное сравнение. Аналог equals*
+def __eq__(self, other): return self.x == other.x # вызывается при проверке через ==
 # isinstance(x, T) — принадлежит ли объект типу. Аналог instanceof*.
 
 falsy = [
@@ -62,24 +101,22 @@ def report(predictions: list[float], labels: list[int], threshold: float = 0.5) 
 # c: int - переменная НЕ создана, только аннотация - значений по умолчанию нет
 # c: int = 0 - создана, значение 0, плюс аннотация (не принято)
 
-# Comprehensions - создание массива из уже существующего
+# Comprehensions - создание массива из уже существующего - генератор коллекции
 squares = []
 for x in range(5):
     squares.append(x * x)
 
 squares = [x * x for x in range(5) if x > 5]
+# что делаем → откуда берём → фильтр.
 
 # columns = df.columns
 # missing_columns = needed_columns - set(columns)
 # сеты можно вычитать
 
-# что делаем → откуда берём → фильтр.
-
-# [x * 2 for x in data]       # list — квадратные
-# {x * 2 for x in data}       # set  — фигурные, дубли уйдут
-# (x * 2 for x in data)       # генератор — круглые
-
-# запятая — это оператор, который создаёт tuple.
+# [x * 2 for x in data]       # генератор списка list — квадратные
+# {x * 2 for x in data}       # генератор коллекции set  — фигурные, дубли уйдут
+# (x * 2 for x in data)       # генератор выражения — круглые
+# и тд
 
 # генератор — ленивый объект, который считает
 # элементы по одному по мере запроса и не хранит их в памяти.
@@ -89,8 +126,6 @@ squares = [x * x for x in range(5) if x > 5]
 
 # Работают лениво: any останавливается на первом истинном,
 # all — на первом ложном.
-
-# sorted(words, key=len)  # по длине
 
 # lambda — анонимная функция. lambda x: x * 2 эквивалентно def f(x): return x * 2.
 
