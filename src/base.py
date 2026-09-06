@@ -1,5 +1,18 @@
 import math
 
+# Общий принцип: держись одной библиотеки в пределах операции.
+# Раз данные в pandas и сравнение в pandas — парсинг тоже в pandas.
+
+def f(a, *, c):
+f(1, c=2)   #
+f(1, 2)     # TypeError
+# * — разделитель. Всё, что после неё, можно передавать только по имени.
+
+def f(a, /, b):
+f(1, b=2)
+f(a=1, b=2)  # TypeError
+# / - разделитель. Всё до него нельзя передавать по имени
+
 result["is_valid"] = not result["missing_columns"] and all(
         result[k] == 0 for k in ("duplicate_rows", "invalid_prices", "missing_markets", "invalid_dates")
         # missing_columns - список пустой
@@ -8,10 +21,8 @@ result["is_valid"] = not result["missing_columns"] and all(
 if not missing_columns:      # «список пуст»
 if len(missing_columns) == 0 # то же самое, не принято (PEP 8)
 
-
 d = dict() # не принято
 d = {}
-
 dict = "что-то"
 x = dict()      # TypeError
 y = {}          # работает всегда
@@ -21,11 +32,14 @@ dict - {}
 tuple - ()
 str - ""
 set - исключение -> set()
+# set не держит порядок вставки - при print или for порядок не гарантирован
+list({3, 1, 2})     # порядок всё ещё произвольный, просто зафиксирован в этом объекте
+sorted({3, 1, 2})   # [1, 2, 3] — детерминированный
 
 sorted(x)
 # возвращает новую коллекцию не меняет оригинал
 # sorted(words, key=len)  # по длине
-
+# key - принимает функция
 x.sort()
 # возвращает None меняет оригинал только с list
 
