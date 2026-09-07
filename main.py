@@ -1,4 +1,4 @@
-from src.base import report
+from src.python import report
 
 # import src.syntax работает, но
 # заставляет писать полный путь при каждом вызове.

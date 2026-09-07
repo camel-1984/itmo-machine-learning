@@ -14,14 +14,16 @@ f(a=1, b=2)  # TypeError
 # / - разделитель. Всё до него нельзя передавать по имени
 
 result["is_valid"] = not result["missing_columns"] and all(
-        result[k] == 0 for k in ("duplicate_rows", "invalid_prices", "missing_markets", "invalid_dates")
+        result[k] == 0 for k in ("duplicate_rows", "invalid_prices", "missing_markets", "invalid_dates"))
         # missing_columns - список пустой
         # остальное int = 0
+
+result = all(x == 0 for x in result.values() if type(x) == int)
 
 if not missing_columns:      # «список пуст»
 if len(missing_columns) == 0 # то же самое, не принято (PEP 8)
 
-d = dict() # не принято
+d = dict() # не принято объявлять так
 d = {}
 dict = "что-то"
 x = dict()      # TypeError
@@ -37,11 +39,14 @@ list({3, 1, 2})     # порядок всё ещё произвольный, п�
 sorted({3, 1, 2})   # [1, 2, 3] — детерминированный
 
 sorted(x)
-# возвращает новую коллекцию не меняет оригинал
+# возвращает новый list не меняет оригинал
 # sorted(words, key=len)  # по длине
 # key - принимает функция
 x.sort()
 # возвращает None меняет оригинал только с list
+
+# приведения типов делается через list() set() объявление через [] () {}...
+# исключение - comprehension там тоже нужно [] ()
 
 x = (5)    # int, скобки просто группировка
 y = (5,)   # tuple из одного элемента
@@ -88,7 +93,8 @@ def describe(data) -> str:
 # x is y — один ли это объект. Используется практически только с None, True, False.
 # x == y — равны ли значения. Всё остальное сравнение. Аналог equals*
 def __eq__(self, other): return self.x == other.x # вызывается при проверке через ==
-# isinstance(x, T) — принадлежит ли объект типу. Аналог instanceof*.
+isinstance(x, T) # принадлежит ли объект типу с наследованием. Аналог instanceof*.
+type(x) # строго узнать тип
 
 falsy = [
     False, None,                          # специальные

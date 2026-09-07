@@ -51,7 +51,7 @@ df.head()      # первые строки - df
 df.shape       # (строк, столбцов) - tuple
 df.columns     # название колонок - возвращает Index - хитрый массив с хеш таблицей
 
-df.dtypes      # тип КАЖДОЙ колонки - series
+df.      # тип КАЖДОЙ колонки - series
 # dtype определяется СОДЕРЖИМЫМ:
 # одна ячейка "n/a" → вся колонка станет object (строки) → арифметика не работает
 
@@ -104,6 +104,7 @@ df_copy = df_copy.sort_values(by=["observations"] + group_by, ascending=[False] 
 
 df["price"].isna().sum()      # сколько пропусков
 df.dropna(subset=["price"])   # удалить строки с NaN
+# Удаление строк из DataFrame — операция над всей таблицей, её нельзя собрать поколоночно.
 df["price"].fillna(df["price"].median())
 
 df.loc[df["price"].isna(), "price"] = df["price"].median()
@@ -160,10 +161,12 @@ for col in pos:
 df[pos] = df[pos].apply(lambda s: s.str.split().str.join(" "))
 # apply медленнее чем pd метод
 
-# Удаление строк из DataFrame — операция над всей таблицей, её нельзя собрать поколоночно.
+df_valid["market"] = df_valid["market"].astype("string").str.split().str[:2].str.join(" ")
+# взять 2 слова
 
 f.groupby("market")["price"].mean()
-# groupby - ленивый ничего не делает без терминальной функции
+# groupby - ленивый ничего не делает без терминальной функции (сортирует по умолчанию)
+# возвращает Series чтобы вернуться к DF надо reset_index() и потом только сортировать
 # Читается: сгруппируй по market → возьми price → посчитай среднее в каждой группе.
 # market
 # Herat 75.0
@@ -204,6 +207,14 @@ report["price_range"] = report["max_price"] - report["min_price"]
 # Это называется pivot — разворот таблицы.
 df_copy = df_copy.groupby(["year", "month", "market"])["price"].median().unstack("market")
 # Берёт один уровень индекса и делает из его уникальных значений колонки.
+df_copy = df_copy.rename_axis(columns=None) # market становится подписью оси, надо убрать
+# по умолчанию None
+rename_axis(index=None)              # стереть имя оси строк
+rename_axis(columns="рынок")         # задать имя оси колонок
+rename_axis(index=None, columns=None) # обе сразу
+df.index.name      # имя оси СТРОК
+df.columns.name    # имя оси КОЛОНОК
+# Осей две — у любого DataFrame.
 
 markets = ["fasf", "dafaf"]
 df_copy = df_copy[markets] # поставить колонки в порядке списка markets
@@ -338,5 +349,10 @@ b = a[2:5].copy() # явная копия
 # В современном pandas и numpy большинство операций возвращают новые объекты, а не изменяют исходные.
 df_copy = df.copy()
 # явная копия
+df_copy = df.copy()
+df_copy[pos] = ... # явная запись -> нужна копия
+
+df = df[mask] # перепривязка ссылки (копия не нужна и так новый объект)
+df_valid = df[mask] # чтобы не путаться и сохранять ссылку на исходный объект в функции
 
 # у СПИСКА срез — копия, у ndarray — view.
