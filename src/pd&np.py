@@ -11,11 +11,76 @@ np.isfinite(a)  np.log(a)  np.where(m)  np.diff(a)  np.concatenate([a, b])
 # Методов у ndarray мало, и они про сам массив, а не про математику:
 a.sum()  a.mean()  a.max()  a.reshape()  a.astype()  a.copy()  a.T  a.argmax()
 
+# --- Series.duplicated(keep='first') ---
+# Возвращает Series типа BOOL той же длины и с тем же индексом.
+# True = значение уже встречалось ранее (по правилу keep), т.е. это дубликат.
+# Сравнение по ЗНАЧЕНИЮ, индекс не участвует. NaN сравнивается с NaN как равный.
+s.duplicated()                  # keep='first': первое вхождение False, остальные True
+s.duplicated(keep='last')       # последнее вхождение False, остальные True
+s.duplicated(keep=False)        # True у ВСЕХ вхождений, у которых есть дубли
+type(s.duplicated())            # <class 'pandas.core.series.Series'>, dtype=bool
+
+# Число дубликатов = сумма True (bool суммируется как 0/1)
+s.duplicated().sum()            # 2
+
+# --- DataFrame.duplicated(subset=None, keep='first') ---
+# Возвращает Series типа BOOL длиной = число строк, индекс = индекс DataFrame.
+# ВАЖНО: возвращает НЕ DataFrame. Дубликат определяется по КОМБИНАЦИИ значений строки.
+# subset=None -> учитываются ВСЕ столбцы.
+df.duplicated()                 # строки 1 и 3 дублируют строку 0
+type(df.duplicated())           # <class 'pandas.core.series.Series'>, dtype=bool
+
+# subset = список/имя столбцов -> дубликаты ищутся только по ним
+df.duplicated(subset=["a"])
+df.duplicated(subset="a")       # можно строкой, если один столбец
+
+# keep работает так же, как у Series
+df.duplicated(keep='last')
+df.duplicated(keep=False)
+
+# --- Типовое применение: булева маска для фильтрации ---
+df[df.duplicated()]             # только строки-дубликаты
+df[~df.duplicated()]            # эквивалент df.drop_duplicates()
+
+# --- Отличие от drop_duplicates ---
+# duplicated()      -> Series[bool] (МАСКА, что удалять)
+# drop_duplicates() -> DataFrame/Series (уже ОЧИЩЕННЫЕ данные), те же параметры subset/keep
+
+# ИТОГ:
+# duplicated -> ВСЕГДА Series[bool] той же длины (и для Series, и для DataFrame)
+# keep='first' (по умолчанию) | 'last' | False
+# subset — только у DataFrame
+
+
+
+# df.to_string
+# seried.tolist
+# pandas функции
+
+
+
+# --- Series.unique() ---
+# Возвращает МАССИВ уникальных значений в порядке первого появления (без сортировки).
+# NaN СЧИТАЕТСЯ значением и попадает в результат ровно один раз. Параметров нет.
+
+# --- Series.nunique(dropna=True) ---
+# Возвращает int — количество различных значений.
+# По умолчанию dropna=True: NaN НЕ учитывается. dropna=False добавляет +1 за NaN.
+
+# --- DataFrame.unique() ---
+# НЕ СУЩЕСТВУЕТ -> AttributeError
+
+# --- DataFrame.nunique(axis=0, dropna=True) ---
+# Возвращает Series из int.
+# axis=0 (по умолчанию): индекс = имена столбцов, значения = число уникальных в столбце.
+# axis=1: индекс = индекс строк, значения = число уникальных в строке.
+
 # ============================================================
 #  1. ИЕРАРХИЯ ТИПОВ
 # ============================================================
 
-# DataFrame = набор Series {} словарь где ключи - атрибуты (названия колонок), значения Series которые равняются по внутреннему индексу который можно задать при создании df в том числе
+# DataFrame = набор Series {} словарь где ключи - атрибуты (названия колонок), значения Series которые равняются по внутреннему индексу
+# можно создать из списка строк df
 # Series = ndarray(одномерный) [] + индекс (метки строк) (можно создать из словаря тогда ключи - атрибуты
 # ndarray = плотный блок памяти одного типа (пихнуть можно что угодно но приведет к одному) (n dimensional)
 
@@ -34,6 +99,9 @@ len(a)      # 3
 a.size      # 3
 a.shape     # (3,)
 
+s.size    5    # всего элементов, включая NaN
+s.count() 3    # только непустые значения
+
 m = np.array([[1, 2, 3],
               [4, 5, 6]])
 
@@ -50,10 +118,11 @@ df = pd.read_csv("data.csv")
 df = pd.read_csv("data.csv", usecols=["price"])   # только нужные колонки
 
 df.head()      # первые строки - df
+df.to_string() # все показать
 df.shape       # (строк, столбцов) - tuple
 df.columns     # название колонок - возвращает Index - хитрый массив с хеш таблицей
 
-df.columns      # тип КАЖДОЙ колонки - series
+df.columns      # тип КАЖДОЙ колонки
 # dtype определяется СОДЕРЖИМЫМ:
 # одна ячейка "n/a" → вся колонка станет object (строки) → арифметика не работает
 # int64 float64 bool object
@@ -65,6 +134,7 @@ dupl = df.duplicated(keep="first").sum()
 # duplicated() - Series T/F
 df.sum()          # Series по колонкам
 df.sum().sum()    # одно число
+
 
 axis=k — это ось, которая исчезает. Работает для любой размерности:
 a.shape          # (2, 3, 4)
@@ -84,6 +154,12 @@ df[df["price"] > 100]             # фильтр
 df[(df["price"] > 100) & (df["area"] < 50)]   # & | ~ и СКОБКИ, как в numpy
 
 df.loc[5, "price"]     # по МЕТКАМ (строка, столбец)
+passed = df.loc[df['scores'] >= 60, 'student'] # series
+
+mask = df["scores"] >= 60
+student = df["student"]
+passed = student[mask]
+
 df.iloc[5, 0]          # по ПОЗИЦИЯМ (строка, столбец)
 # базовая индексация int 0 -> n-1 может быть изменена но iloc всегда идет по дефолтной 0 1 ...
 
@@ -123,7 +199,7 @@ prices = pd.to_numeric(df["price"], errors="coerce")
 pd.isna(a)
 # nan None NaT NA что угодно
 nan - numpy в pandas напечатет NaN принято nan
-NA и NaT - pandas
+NA и NaT - pandasi
 pd.NA - не привязан к float заменяем на него когда string
 
 np.nan   # float-колонки, numpy-массивы — классика
@@ -132,6 +208,7 @@ pd.NaT   # datetime
 None     # object-колонки, Python-код
 
 .str - строки
+# df["point_longitude"] = df["point"].str.get("long") применяем str чтобы обртится к dict
 .cat - категориональные данные
 .dt - дата время
 df_copy["year"] = df_copy["date"].dt.year
@@ -148,6 +225,7 @@ non_valid = market.isna() | blank
 astype(str) # нужен, чтобы .str не спотыкался, если в колонке смешаны типы.
 
 parsed = pd.to_datetime(date, format="%Y-%m-%d", errors="coerce")
+parsed = pd.to_datetime(raw, errors="coerce", format="mixed") # пытется распарсить любые виды дт
 # преобразовывает object в datetime
 
 # Когда в [] передаётся булев DataFrame а не Series, pandas делает не фильтрацию строк, а поэлементное маскирование:
@@ -239,6 +317,10 @@ prices = np.array([100.0, -5.0, 200.0, 0.0])
 mask = np.array([True, False, True])      # 1D
 np.where(mask)          # (array([0, 2])), — кортеж из ОДНОГО массива
 np.where(mask)[0]       # array([0, 2])      — сам массив
+
+
+lat = lat.where(lat.notna(), pd.to_numeric(coord_frame["point_latitude"], errors="coerce"))
+# Итог: «возьми geometry, а если её нет — возьми point». Обычный fallback, векторизованный.
 
 m = np.array([[True,  False, True],
               [False, True,  False]])

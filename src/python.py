@@ -1,4 +1,35 @@
 import math
+from pathlib import Path
+
+# l.append(a, b, c), Python выдаст ошибку:
+# TypeError: append() takes exactly one argument (3 given)
+# l.extend([a, b, c])
+
+def check_id(pd_id_source_id: pd.DataFrame) -> tuple[list, dict]:
+# аннотация принимает одно выражение ибо Функция в Python возвращает ровно один объект.
+
+# хешируемое = неизменяемое
+# Хешируемы: числа, строки, кортежи, None
+# Нехешируемы: списки, словари, множества.
+
+path = Path("/Users/rostislavmolcanov/Documents/itmo/curse3/ml/conspects/data/wfp_food_prices_ken.csv")
+path = root / "data" / "raw" / "file.geojson"
+name = path.name
+parent = path.parent.parent
+text = path.read_text(encoding="utf-8")
+
+props = properties(record)
+        row = {
+            key: props.get(key)
+            for key in (
+                "id", "datetime", "region", "category", "severity", "light",
+                "participants_count", "injured_count", "dead_count",
+            )
+        }
+
+# dict comprehension
+# .get() - вернет None если ключа нет
+# dic["key"] - упадет
 
 # Общий принцип: держись одной библиотеки в пределах операции.
 # Раз данные в pandas и сравнение в pandas — парсинг тоже в pandas.
