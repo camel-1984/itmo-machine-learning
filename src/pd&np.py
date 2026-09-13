@@ -153,12 +153,19 @@ df["price"]                       # колонка
 df[df["price"] > 100]             # фильтр
 df[(df["price"] > 100) & (df["area"] < 50)]   # & | ~ и СКОБКИ, как в numpy
 
-df.loc[5, "price"]     # по МЕТКАМ (строка, столбец)
+df.loc[5, "price"]     # по МЕТКАМ (строка, столбец) индекс, фича
 passed = df.loc[df['scores'] >= 60, 'student'] # series
+# можно прокинуть и булеву маску на нужные индексы
 
 mask = df["scores"] >= 60
 student = df["student"]
 passed = student[mask]
+
+threshold = counts.loc[counts["category"] == "Иной вид ДТП", "count"].iloc[0]
+# забрать конкретное значение ячейки
+
+frame = pd.concat([counts.loc[~rare], rest], ignore_index=True)
+# склеить
 
 df.iloc[5, 0]          # по ПОЗИЦИЯМ (строка, столбец)
 # базовая индексация int 0 -> n-1 может быть изменена но iloc всегда идет по дефолтной 0 1 ...
@@ -213,6 +220,9 @@ None     # object-колонки, Python-код
 .dt - дата время
 df_copy["year"] = df_copy["date"].dt.year
 df_copy["month"] = df_copy["date"].dt.month
+
+frame["year_month"] = datetime.dt.to_period("M")
+# получить хороший формат yyyy-mm который сраниватся и тд
 # Это называется "accessor" (аксессор/накопитель методов).a
 # Вне pd np не существует
 # необходимо юзать с Series, чтобы выполнить операцию нужную
@@ -252,12 +262,23 @@ f.groupby("market")["price"].mean()
 # Herat 75.0
 # Kabul 110.0
 
-df.groupby(keys).agg(
+s = df.groupby(keys).agg(
     имя_результата=("исходная_колонка", "функция"),
     ...
 )
 # на выходе схлопнутый (сгруппированный) series где сначала колонки из keys потом колонки агрегации
 # После группировки метками строк (Индекс) становятся сами значения ключей: -> надо reset без drop
+
+def dtp_category_frame(df: pd.DataFrame) -> pd.DataFrame:
+    frame = (
+        df.groupby("category", dropna=False)
+        .size()
+        .rename("count")
+        .reset_index()
+        .sort_values("count", ascending=False, ignore_index=True)
+    )
+    return frame
+
 
 report["price_range"] = report["max_price"] - report["min_price"]
 # присобачить новую колонку в df
