@@ -1,6 +1,13 @@
 import math
 from pathlib import Path
 
+out_of_region = ~missing & ~(lat.between(*lat_range) & lon.between(*lon_range))
+# * — распаковка последовательности в аргументы. lat_range это кортеж (55.0, 57.0),
+# и запись lat.between(*lat_range) разворачивается в lat.between(55.0, 57.0)
+
+f(**{"left": 1, "right": 2}) == f(left=1, right=2)
+# Есть парный ** — он распаковывает словарь в именованные аргументы
+
 # l.append(a, b, c), Python выдаст ошибку:
 # TypeError: append() takes exactly one argument (3 given)
 # l.extend([a, b, c])

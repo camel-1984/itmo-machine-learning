@@ -1,6 +1,13 @@
 import pandas as pd
 import numpy as np
 
+Series.between(left, right)
+# возвращает булеву Series: True там, где значение попало в диапазон.
+# По умолчанию границы включаются — то есть это (s >= left) & (s <= right)
+
+pivot = frame.pivot(index="week_day", columns="hour", values="count")
+# разворачивает как мы хотим
+
 # pandas объектно-ориентирован — почти всё метод.
 df.sum()  df.dropna()  s.isna()  s.astype()  s.str.strip()
 # Функций модуля мало, и они трёх видов: создание + объединение + pd.isna()
@@ -80,7 +87,7 @@ df[~df.duplicated()]            # эквивалент df.drop_duplicates()
 # ============================================================
 
 # DataFrame = набор Series {} словарь где ключи - атрибуты (названия колонок), значения Series которые равняются по внутреннему индексу
-# можно создать из списка строк df
+# можно создать из списка строк df тогда значения в []
 # Series = ndarray(одномерный) [] + индекс (метки строк) (можно создать из словаря тогда ключи - атрибуты
 # ndarray = плотный блок памяти одного типа (пихнуть можно что угодно но приведет к одному) (n dimensional)
 
@@ -278,6 +285,8 @@ def dtp_category_frame(df: pd.DataFrame) -> pd.DataFrame:
         .sort_values("count", ascending=False, ignore_index=True)
     )
     return frame
+
+# сдесь ignore index == reset_index после сортировки
 
 
 report["price_range"] = report["max_price"] - report["min_price"]
