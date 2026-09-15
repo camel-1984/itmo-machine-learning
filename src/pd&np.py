@@ -1,6 +1,64 @@
 import pandas as pd
 import numpy as np
 
+frame["cumulative"] = variance.cumsum()
+# трейловая сумма
+
+frame = pd.DataFrame(coords[:, :pc_count], columns=[f"pc{i}" for i in range(1, pc_count+1)], index=h3_profiles.index)
+# генератор списка где строки через f"pc{i}"
+
+X = df.drop(columns="count")
+
+profiles.insert(0, "count", counts)
+# Три аргумента: куда (индекс позиции), как назвать, что положить.
+# остальные фичи сдвигаются
+# применяется in place
+
+# axis — это «вдоль какой оси работает операция». axis=0 — строки (вертикаль), axis=1 — колонки (горизонталь).
+#
+# - pd.concat([a, b], axis=0) — таблицы ставятся друг под друга, строк становится больше.  МОЖНО - axis="rows")
+# Совмещаются по колонкам: одинаковые имена сойдутся, разные дадут NaN.
+# - pd.concat([a, b], axis=1) — таблицы ставятся бок о бок, колонок становится больше.  МОЖНО - axis="columns")
+# Совмещаются по индексу: строка с индексом 87118...a из первой таблицы встанет напротив такой же из второй.
+
+
+h3_category = pd.crosstab(frame["cell"], frame["category"], normalize="index")
+# category   Наезд на пешехода  Столкновение  Съезд с дороги
+# cell
+# 87118...a               0.40          0.55            0.05
+# 87118...b               0.06          0.24            0.70
+# normalize - процент по ирдексу (строчке)
+
+
+def dtp_category_frame(df: pd.DataFrame) -> pd.DataFrame:
+    frame = (
+        df.groupby("category", dropna=False)
+        .size()
+        .rename("count")
+        .reset_index()
+        .sort_values("count", ascending=False, ignore_index=True)
+    )
+    return frame
+
+# сдесь ignore index == reset_index после сортировки
+
+# ТОЖЕ САМОЕ только сначала индексы сортируем ибо value_count по убыванию count
+frame = frame["year_month"].value_counts().sort_index().reset_index()
+
+counts = (
+        pd.Series(cells, name="cell")
+        .value_counts()
+        .rename("count")
+        .reset_index()
+    )
+
+counts = frame["cell"].value_counts()
+frame = frame[frame["cell"].isin(counts[counts >= min_count].index)]
+# тоже самое что size() в groupby только для series
+# схлопывает повторы - возвращает series где index то что схлопнули и столбец count
+df.groupby("cell").size()        # Series: ячейка → сколько строк
+df["cell"].value_counts()         # Series: ячейка → сколько строк
+
 Series.between(left, right)
 # возвращает булеву Series: True там, где значение попало в диапазон.
 # По умолчанию границы включаются — то есть это (s >= left) & (s <= right)
@@ -86,8 +144,7 @@ df[~df.duplicated()]            # эквивалент df.drop_duplicates()
 #  1. ИЕРАРХИЯ ТИПОВ
 # ============================================================
 
-# DataFrame = набор Series {} словарь где ключи - атрибуты (названия колонок), значения Series которые равняются по внутреннему индексу
-# можно создать из списка строк df тогда значения в []
+# DataFrame = набор Series {} словарь где ключи - атрибуты, значения [], (названия колонок), значения Series которые равняются по внутреннему индексу
 # Series = ndarray(одномерный) [] + индекс (метки строк) (можно создать из словаря тогда ключи - атрибуты
 # ndarray = плотный блок памяти одного типа (пихнуть можно что угодно но приведет к одному) (n dimensional)
 
@@ -275,18 +332,6 @@ s = df.groupby(keys).agg(
 )
 # на выходе схлопнутый (сгруппированный) series где сначала колонки из keys потом колонки агрегации
 # После группировки метками строк (Индекс) становятся сами значения ключей: -> надо reset без drop
-
-def dtp_category_frame(df: pd.DataFrame) -> pd.DataFrame:
-    frame = (
-        df.groupby("category", dropna=False)
-        .size()
-        .rename("count")
-        .reset_index()
-        .sort_values("count", ascending=False, ignore_index=True)
-    )
-    return frame
-
-# сдесь ignore index == reset_index после сортировки
 
 
 report["price_range"] = report["max_price"] - report["min_price"]
