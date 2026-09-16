@@ -1,6 +1,32 @@
 import pandas as pd
 import numpy as np
 
+status = frame["health_status"]
+status.ne("asfdasgasgba")
+# != для цепочек
+
+frame["died"] = status.str.startswith(DIED_PREFIX, na=False)
+# превращает na в False чтобы na не ломали сумирование
+
+inside = participants[participants["in_vehicle"]]
+frame = inside.merge(
+    vehicles[["source_id", "vehicle_idx", "brand", "year", "category"]],
+    on=["source_id", "vehicle_idx"],
+    how="inner",
+    validate="many_to_one",
+)
+# sql merge — по значениям колонок.
+
+frame = pd.concat([counts.loc[~rare], rest], ignore_index=True)
+# склеить
+
+frame = df[[f"pc{i}" for i in range(1, pc_count+1)]]
+
+# len(df) — строки;
+# - len(df.columns) — колонки;
+# - df.shape — кортеж (строки, колонки), то есть (11, 11);
+# - df.size — всего клеток.
+
 frame["cumulative"] = variance.cumsum()
 # трейловая сумма
 
@@ -227,9 +253,6 @@ passed = student[mask]
 
 threshold = counts.loc[counts["category"] == "Иной вид ДТП", "count"].iloc[0]
 # забрать конкретное значение ячейки
-
-frame = pd.concat([counts.loc[~rare], rest], ignore_index=True)
-# склеить
 
 df.iloc[5, 0]          # по ПОЗИЦИЯМ (строка, столбец)
 # базовая индексация int 0 -> n-1 может быть изменена но iloc всегда идет по дефолтной 0 1 ...
