@@ -1,6 +1,9 @@
 import math
 from pathlib import Path
 
+Подчёркивание в начале имени — соглашение: функция внутренняя,
+снаружи модуля ею пользоваться не предполагается.
+
 out_of_region = ~missing & ~(lat.between(*lat_range) & lon.between(*lon_range))
 # * — распаковка последовательности в аргументы. lat_range это кортеж (55.0, 57.0),
 # и запись lat.between(*lat_range) разворачивается в lat.between(55.0, 57.0)
