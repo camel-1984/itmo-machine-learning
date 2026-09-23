@@ -1,206 +1,377 @@
 import math
 from pathlib import Path
 
-Подчёркивание в начале имени — соглашение: функция внутренняя,
-снаружи модуля ею пользоваться не предполагается.
+# ============================================================
+# 1. ОПЕРАТОРЫ И ВЫРАЖЕНИЯ
+# ============================================================
 
-out_of_region = ~missing & ~(lat.between(*lat_range) & lon.between(*lon_range))
-# * — распаковка последовательности в аргументы. lat_range это кортеж (55.0, 57.0),
-# и запись lat.between(*lat_range) разворачивается в lat.between(55.0, 57.0)
+# --- Морж-оператор := (walrus, Python 3.8+) ---
+# Присваивает значение И возвращает его как результат выражения.
+# Обычное присваивание (x = 5) — инструкция: ничего не возвращает
+# и не может стоять внутри if, comprehension и т.п. := делает присваивание выражением.
+#
+#   if (value := elements[i]) > boundary:
+#       return value
+#
+# Уместен, когда одно и то же выражение и проверяется, и используется дальше:
+# экономит повторное вычисление и лишнюю строку.
+#
+# 1. Чтение потока построчно
+#   while (line := f.readline()):
+#       process(line)
+#   Без моржа: line = f.readline() до цикла + ещё раз в конце тела.
+#
+# 2. Фильтр + переиспользование результата
+#   results = [y for x in data if (y := expensive(x)) is not None]
+#   Без моржа expensive(x) вызвалась бы дважды.
+#
+# 3. Сохранение промежуточного значения в условии
+#   if (n := len(items)) > 10:
+#       print(f"слишком много: {n}")
 
-f(**{"left": 1, "right": 2}) == f(left=1, right=2)
-# Есть парный ** — он распаковывает словарь в именованные аргументы
+# --- Тернарный оператор ---
+# значение_если_истина if условие else значение_если_ложь
+x = clicks // shows if shows > 0 else 0
 
-# l.append(a, b, c), Python выдаст ошибку:
-# TypeError: append() takes exactly one argument (3 given)
-# l.extend([a, b, c])
-
-def check_id(pd_id_source_id: pd.DataFrame) -> tuple[list, dict]:
-# аннотация принимает одно выражение ибо Функция в Python возвращает ровно один объект.
-
-# хешируемое = неизменяемое
-# Хешируемы: числа, строки, кортежи, None
-# Нехешируемы: списки, словари, множества.
-
-path = Path("/Users/rostislavmolcanov/Documents/itmo/curse3/ml/conspects/data/wfp_food_prices_ken.csv")
-path = root / "data" / "raw" / "file.geojson"
-name = path.name
-parent = path.parent.parent
-text = path.read_text(encoding="utf-8")
-
-props = properties(record)
-        row = {
-            key: props.get(key)
-            for key in (
-                "id", "datetime", "region", "category", "severity", "light",
-                "participants_count", "injured_count", "dead_count",
-            )
-        }
-
-# dict comprehension
-# .get() - вернет None если ключа нет
-# dic["key"] - упадет
-
-# Общий принцип: держись одной библиотеки в пределах операции.
-# Раз данные в pandas и сравнение в pandas — парсинг тоже в pandas.
-
-def f(a, *, c):
-f(1, c=2)   #
-f(1, 2)     # TypeError
-# * — разделитель. Всё, что после неё, можно передавать только по имени.
-
-def f(a, /, b):
-f(1, b=2)
-f(a=1, b=2)  # TypeError
-# / - разделитель. Всё до него нельзя передавать по имени
-
-result["is_valid"] = not result["missing_columns"] and all(
-        result[k] == 0 for k in ("duplicate_rows", "invalid_prices", "missing_markets", "invalid_dates"))
-        # missing_columns - список пустой
-        # остальное int = 0
-
-result = all(x == 0 for x in result.values() if type(x) == int)
-
-if not missing_columns:      # «список пуст»
-if len(missing_columns) == 0 # то же самое, не принято (PEP 8)
-
-d = dict() # не принято объявлять так
-d = {}
-dict = "что-то"
-x = dict()      # TypeError
-y = {}          # работает всегда
-
-list - []
-dict - {}
-tuple - ()
-str - ""
-set - исключение -> set()
-# set не держит порядок вставки - при print или for порядок не гарантирован
-list({3, 1, 2})     # порядок всё ещё произвольный, просто зафиксирован в этом объекте
-sorted({3, 1, 2})   # [1, 2, 3] — детерминированный
-
-sorted(x)
-# возвращает новый list не меняет оригинал
-# sorted(words, key=len)  # по длине
-# key - принимает функция
-x.sort()
-# возвращает None меняет оригинал только с list
-
-# приведения типов делается через list() set() int() str()... объявление через [] () {}...
-# исключение - comprehension там тоже нужно [] ()
-
-x = (5)    # int, скобки просто группировка
+# --- Кортеж создаёт запятая, а не скобки ---
+x = (5)    # int, скобки — просто группировка
 y = (5,)   # tuple из одного элемента
 z = 5,     # тоже tuple!
-# запятая — это оператор, который создаёт tuple.
+e = ()     # единственное исключение: пустой tuple — это именно скобки
 
-_, relative_change = ...
-# распаковка кортежа
-# через [1] - считается плохо
+# --- Распаковка * и ** в аргументы ---
+# * — распаковывает последовательность в позиционные аргументы:
+# lat_range = (55.0, 57.0)  →  lat.between(*lat_range) == lat.between(55.0, 57.0)
+out_of_region = ~missing & ~(lat.between(*lat_range) & lon.between(*lon_range))
+
+# ** — распаковывает словарь в именованные аргументы:
+f(**{"left": 1, "right": 2}) == f(left=1, right=2)
+
+# --- lambda ---
+# Анонимная функция в одно выражение:
+# lambda x: x * 2   ≈   def f(x): return x * 2
+
+
+# ============================================================
+# 2. ФУНКЦИИ И ПАРАМЕТРЫ
+# ============================================================
+
+# --- Аннотация возвращаемого значения ---
+# Функция возвращает ровно один объект. return a, b — это один tuple (a, b),
+# поэтому и аннотация одна: tuple[...].
+def check_id(pd_id_source_id: pd.DataFrame) -> tuple[list, dict]:
+    ...
+
+# --- * и / в сигнатуре ---
+# * — всё ПОСЛЕ неё передаётся только по имени (keyword-only)
+def f(a, *, c): ...
+f(1, c=2)    # ок
+f(1, 2)      # TypeError
+
+# / — всё ДО него передаётся только по позиции (positional-only)
+def f(a, /, b): ...
+f(1, b=2)    # ок
+f(a=1, b=2)  # TypeError
+
+# --- Перегрузок нет ---
+# Одна функция с одним именем. Вместо перегрузок — значения по умолчанию
+# и именованные аргументы (см. normalize() ниже).
+
+# --- Функция без return возвращает None ---
+# Аналог void, но технически функция всё равно возвращает объект — None.
+
+
+# ============================================================
+# 3. ПЕРЕМЕННЫЕ И АННОТАЦИИ
+# ============================================================
+
+# c = 0        — переменная создана, значение 0
+# c: int       — только аннотация, переменная НЕ создана (обращение → NameError)
+# c: int = 0   — создана, значение 0, плюс аннотация (нормальная практика)
+
+# Аннотации не проверяются при запуске — это подсказка для IDE и линтеров.
+lst_a: list[int] | range
+func(range(1, 10))
+
+# range — ленивый: range(1, 5) не хранит [1, 2, 3, 4] в памяти,
+# а хранит start, stop, step и вычисляет значение по индексу по запросу.
+
+# _имя — соглашение: «внутреннее», снаружи модуля/класса не использовать.
+# Работает для функций, переменных, методов. Интерпретатор это не запрещает.
+
+# _ — имя для ненужного значения:
+_, relative_change = compute()   # распаковка кортежа, первое значение выбрасываем
+# relative_change = compute()[1] — работает, но читается хуже
+
+
+# ============================================================
+# 4. COMPREHENSIONS И ГЕНЕРАТОРЫ
+# ============================================================
+
+# Comprehension — короткая запись «создать коллекцию из другой коллекции».
+squares = []
+for x in range(5):
+    if x % 2 == 0:
+        squares.append(x * x)
+
+squares = [x * x for x in range(5) if x % 2 == 0]   # [0, 4, 16]
+# что делаем → откуда берём → фильтр
+
+# Вид скобок определяет результат:
+# [x * 2 for x in data]         # list comprehension
+# {x * 2 for x in data}         # set comprehension — дубли уйдут
+# {x: x * 2 for x in data}      # dict comprehension — есть двоеточие
+# (x * 2 for x in data)         # генераторное выражение — НЕ tuple!
+# tuple(x * 2 for x in data)    # если нужен именно tuple
+
+# Пример dict comprehension:
+props = properties(record)
+row = {
+    key: props.get(key)
+    for key in (
+        "id", "datetime", "region", "category", "severity", "light",
+        "participants_count", "injured_count", "dead_count",
+    )
+}
+# props.get(key) — вернёт None, если ключа нет
+# props[key]     — упадёт с KeyError
+
+# Генератор — ленивый объект: считает элементы по одному по мере запроса
+# и не хранит их все в памяти. Пройти по нему можно только один раз.
+
+# any / all тоже ленивые: any останавливается на первом истинном, all — на первом ложном.
+if any(v is None for v in row.values()):   # по dict без .values() идёт перебор КЛЮЧЕЙ
+    print("есть пропуски")
+
+# reversed(lst) возвращает не список, а итератор:
+# return list(reversed(lst))
+
+
+# ============================================================
+# 5. КОЛЛЕКЦИИ
+# ============================================================
+
+# --- Создание пустых коллекций ---
+d = {}         # принято так
+d = dict()     # работает, но длиннее и медленнее
+
+# Опасность: встроенные имена можно перезатереть
+dict = "что-то"
+x = dict()     # TypeError: 'str' object is not callable
+y = {}         # литерал работает всегда
+# Поэтому не называй переменные list, dict, str, id, sum и т.п.
+
+# Пустые литералы:
+# list  → []
+# dict  → {}
+# tuple → ()
+# str   → ""
+# set   → set()   ({} — это пустой dict, литерала пустого set нет)
+
+# Литералы [] {} () — для создания, конструкторы list() set() int() str() — для приведения типов:
+# list("abc") → ['a', 'b', 'c'],  int("5") → 5
+
+# --- set не хранит порядок ---
+# При print или for порядок не гарантирован.
+list({3, 1, 2})     # порядок произвольный, просто зафиксирован в этом списке
+sorted({3, 1, 2})   # [1, 2, 3] — детерминированный
+# (dict, в отличие от set, порядок вставки хранит — с Python 3.7)
+
+# --- Сортировка и разворот ---
+sorted(x)                # НОВЫЙ list, оригинал не меняется; работает с любым итерируемым
+sorted(words, key=len)   # сортировка по длине
+x.sort()                 # меняет оригинал, возвращает None; только у list
+lst.reverse()            # то же самое: in-place, None, только list
+# Типичная ошибка: lst = lst.sort()  →  lst становится None
+
+# --- append vs extend ---
+l.append(a)              # добавляет ОДИН элемент
+# l.append(a, b, c)      # TypeError: append() takes exactly one argument (3 given)
+l.extend([a, b, c])      # добавляет все элементы итерируемого
+result.extend(lst_a[i:])
+
+# --- Хешируемость ---
+# Ключи dict и элементы set должны быть хешируемыми.
+# Грубо: хешируемое ≈ неизменяемое.
+# Хешируемы:   int, float, str, None, bool, frozenset, tuple (если все его элементы хешируемы)
+# Нехешируемы: list, dict, set
+# (1, [2]) — tuple, но нехешируем, т.к. внутри list
+
+# --- Falsy-значения (в if дают False) ---
+falsy = [
+    False, None,                          # специальные
+    0, 0.0, 0j,                           # нули (+ Decimal(0), Fraction(0))
+    "", [], (), {}, set(), range(0),      # пустые коллекции
+]
+
+# Проверка на пустоту (PEP 8):
+# if not missing_columns:          ← принято
+# if len(missing_columns) == 0:    ← работает, но не принято
+
+
+# ============================================================
+# 6. СРАВНЕНИЕ И ТИПЫ
+# ============================================================
+
+# x is y — один ли это объект в памяти. На практике — почти только x is None.
+#          (для bool пиши просто `if flag:`, а не `if flag is True:`)
+# x == y — равны ли значения. Аналог equals() в Java.
+#          Вызывает __eq__:
+#          def __eq__(self, other): return self.x == other.x
+
+isinstance(x, T)   # принадлежит ли объект типу С УЧЁТОМ наследования. Аналог instanceof
+type(x)            # точный тип объекта, без учёта наследования
+type(x) is T       # строгая проверка типа
+# Нюанс: bool — наследник int, поэтому isinstance(True, int) → True, а type(True) is int → False
+
+# --- Типы (классы) — обычные объекты first-class ---
+# int, str, list и т.п. можно хранить в переменных/списках, сравнивать, вызывать как функцию (создать экземпляр)
+order = [bool, int, float, complex]
+order.index(int)   # 1 — сравнение классов по identity/equality работает как у любых объектов
+
+# max() по индексам, не по типам: max(order.index(t1), order.index(t2)) сравнивает два int,
+# а не сами классы — потом этим числом индексируют список обратно, чтобы получить тип.
+
+# --- Общий тип для приведения двух значений ---
+# числа: bool → int → float → complex (иерархия точности)
+# последовательности: range → tuple → list (иерархия гибкости)
+# если типы из разных семейств или один из них str — общий тип str, т.к. str(x) работает всегда
+
+
+# ============================================================
+# 7. СТРОКИ И СРЕЗЫ
+# ============================================================
 
 s = "  hello    world"
 result = " ".join(s.split())
 print(result)  # "hello world"
 
-# s.split() без аргументов сам:
-# отбрасывает пробелы по краям,
-# схлопывает любые последовательности пробелов/табов/переносов строк между словами,
-# возвращает список слов.
-# " ".join(...) склеивает их обратно через один пробел в строку
+# s.split() без аргументов:
+#   - отбрасывает пробелы по краям,
+#   - схлопывает любые последовательности пробелов/табов/переносов,
+#   - возвращает список слов.
+# " ".join(...) склеивает список обратно через один пробел.
 
-predictions = [0.9, 0.2, 0.7, 0.4, 0.85]
-labels = [1, 0, 1, 1, 0]
+# Срезы — работают для list, tuple, str. Возвращают НОВЫЙ объект.
+# lst[start:stop:step], stop не включается
+#   lst[1:4]   — индексы 1, 2, 3
+#   lst[:3]    — первые три
+#   lst[3:]    — с индекса 3 до конца
+#   lst[-3:]   — последние три
+#   lst[:-1]   — все, кроме последнего
+#   lst[::2]   — каждый второй с начала
+#   lst[1::2]  — каждый второй, начиная с индекса 1
+#   lst[::-1]  — реверс
+#   lst[:]     — поверхностная копия всего списка
+
+
+# ============================================================
+# 8. PATHLIB
+# ============================================================
+
+path = Path("/Users/rostislavmolcanov/Documents/itmo/curse3/ml/conspects/data/wfp_food_prices_ken.csv")
+path = root / "data" / "raw" / "file.geojson"   # / склеивает пути (вместо os.path.join)
+name = path.name                                # "file.geojson"
+parent = path.parent.parent                     # на два уровня вверх
+text = path.read_text(encoding="utf-8")
+
+
+# ============================================================
+# 9. PANDAS / ДАННЫЕ
+# ============================================================
+
+# Общий принцип: держись одной библиотеки в пределах операции.
+# Данные в pandas и сравнение в pandas → парсинг тоже в pandas.
+
+# Множества можно вычитать:
+# missing_columns = needed_columns - set(df.columns)
+
+result["is_valid"] = not result["missing_columns"] and all(
+    result[k] == 0
+    for k in ("duplicate_rows", "invalid_prices", "missing_markets", "invalid_dates")
+)
+# not result["missing_columns"] — список пропущенных колонок пуст
+# остальные счётчики (int) равны 0
+
+# То же, но по всем int-значениям словаря.
+# type(x) is int, а не isinstance — чтобы не захватить bool.
+is_valid = all(x == 0 for x in result.values() if type(x) is int)
+
+
+# ============================================================
+# 10. ASSERT И ИСКЛЮЧЕНИЯ
+# ============================================================
+
+# assert условие, сообщение
+assert clicks <= shows, "Clicks greater than shows"
+# Для отладки, тестов и проверки внутренних инвариантов.
+# При запуске python -O все assert отключаются →
+# НЕ используй assert для проверки пользовательского ввода — там raise ValueError(...).
+
+# Все исключения в Python — как unchecked в Java:
+# их не нужно объявлять (throws нет) и не обязательно ловить.
+
+
+# ============================================================
+# 11. ПРИМЕРЫ ФУНКЦИЙ
+# ============================================================
 
 def split_time(seconds: int) -> tuple[int, int, int]:
     h = seconds // 3600
     left = seconds % 3600
     m = left // 60
     s = left % 60
-    return h, m, s
+    return h, m, s   # возвращается один tuple, при вызове его распаковывают: h, m, s = ...
+
 
 def normalize(value: float, min_val: float = 0.0, max_val: float = 1.0) -> float:
-    if math.isclose(max_val, min_val): # float нельзя сравнить через ==
+    # float через == сравнивать ненадёжно из-за ошибок округления (0.1 + 0.2 != 0.3)
+    if math.isclose(max_val, min_val):
         return 0.0
-
     return (value - min_val) / (max_val - min_val)
 
+
 def describe(data) -> str:
-    if data is None: # null - синглтон, void* функция возвращает None
+    if data is None:   # None — синглтон (единственный объект), аналог null
         return "нет данных"
-    if not data:
+    if not data:       # пустая коллекция
         return "пусто"
     return f"элементов: {len(data)}"
 
-# x is y — один ли это объект. Используется практически только с None, True, False.
-# x == y — равны ли значения. Всё остальное сравнение. Аналог equals*
-def __eq__(self, other): return self.x == other.x # вызывается при проверке через ==
-isinstance(x, T) # принадлежит ли объект типу с наследованием. Аналог instanceof*.
-type(x) # строго узнать тип
 
-falsy = [
-    False, None,                          # специальные
-    0, 0.0, 0j,                           # числа (+ Decimal(0), Fraction(0))
-    "", [], (), {}, set(), range(0),      # пустые коллекции
-]
+predictions = [0.9, 0.2, 0.7, 0.4, 0.85]
+labels = [1, 0, 1, 1, 0]
+
 
 def accuracy(predictions: list[float], labels: list[int], threshold: float = 0.5) -> float:
     if not predictions:
         return 0.0
+    # sum по bool: True считается как 1, False как 0
+    # sum — встроенная функция на C, обычно быстрее ручного цикла с +=
     correct = sum(int(p > threshold) == y for p, y in zip(predictions, labels))
-    # sum - встроенная C функция быстрее python цикла
     return correct / len(predictions)
 
 
 def report(predictions: list[float], labels: list[int], threshold: float = 0.5) -> None:
     for i, (p, y) in enumerate(zip(predictions, labels)):
-        pred = int(p > threshold) # приведение bool к int (нативное)
-        mark = "✓" if pred == y else "✗" # тернарник
+        pred = int(p > threshold)          # bool → int: True → 1, False → 0
+        mark = "✓" if pred == y else "✗"   # тернарник
         print(f"[{i}] pred={p:.2f} → {pred}, true={y}  {mark}")
     print(f"accuracy: {accuracy(predictions, labels, threshold):.2f}")
 
-# c = 0 - переменная создана, значение 0
-# c: int - переменная НЕ создана, только аннотация - значений по умолчанию нет
-# c: int = 0 - создана, значение 0, плюс аннотация (не принято)
 
-# Comprehensions - создание массива из уже существующего - генератор коллекции
-squares = []
-for x in range(5):
-    squares.append(x * x)
+# ============================================================
+# 12. ENTRY POINT
+# ============================================================
 
-squares = [x * x for x in range(5) if x > 5]
-# что делаем → откуда берём → фильтр.
-
-# columns = df.columns
-# missing_columns = needed_columns - set(columns)
-# сеты можно вычитать
-
-# [x * 2 for x in data]       # генератор списка list — квадратные
-# {x * 2 for x in data}       # генератор коллекции set  — фигурные, дубли уйдут
-# (x * 2 for x in data)       # генератор выражения — круглые
-# и тд
-
-# генератор — ленивый объект, который считает
-# элементы по одному по мере запроса и не хранит их в памяти.
-
-# if any(v is None for v in row):
-#     print("есть пропуски")
-
-# Работают лениво: any останавливается на первом истинном,
-# all — на первом ложном.
-
-# lambda — анонимная функция. lambda x: x * 2 эквивалентно def f(x): return x * 2.
-
+# Код внутри выполняется только при прямом запуске файла, но не при импорте.
+# pass нужен, только если блок иначе был бы пустым.
 if __name__ == "__main__":
-    pass
-# pass обязательная заглушка для проверки __name__
-
     h, m, s = split_time(3725)
-    print(m)
-    # print(f"{h}ч {m}м {s}с")
+    print(f"{h}ч {m}м {s}с")
 
-    # print(f"{normalize(0.5):.3f} вот так")
-    # print(normalize(min_val=0.3, value=5))
-    # print(f"{normalize(0.5, max_val=0.3)}")
-# перегрузок нет - используется явная подстановка значений в параметры
+    # print(f"{normalize(0.5):.3f}")
+    # print(normalize(min_val=0.3, value=5))   # именованные аргументы — в любом порядке
+    # print(normalize(0.5, max_val=0.3))
 
     # report(predictions, labels)

@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 status = frame["health_status"]
-status.ne("asfdasgasgba")
+status.ne("dead")
 # != для цепочек
 
 frame["died"] = status.str.startswith(DIED_PREFIX, na=False)
