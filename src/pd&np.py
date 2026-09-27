@@ -1,6 +1,54 @@
 import pandas as pd
 import numpy as np
 
+# --- numpy: маска vs массив номеров ---
+a = np.array([10, 20, 30])
+
+a[np.array([True, False, True])]   # [10, 30] — МАСКА: оставить/выкинуть; длина = len(a)
+a[np.array([2, 0, 0, 1])]          # [30, 10, 10, 20] — НОМЕРА: какие позиции взять
+# номера: любой порядок, повторы, любая длина
+
+a[np.array([[0, 2],
+            [1, 1]])]              # [[10, 30], [20, 20]] — форма результата = форма индекса
+
+# --- pandas: булев DataFrame в [] — маскирование, НЕ фильтр ---
+df = pd.DataFrame({"a": [1, 5], "b": [4, 2]})
+df[df > 2]              # форма та же, строки не пропадают, где False → NaN
+#      a    b
+# 0  NaN  4.0
+# 1  5.0  NaN
+# (int стал float — из-за NaN)
+df.where(df > 2, 0)     # то же, но False → 0 вместо NaN
+df.mask(df > 2)         # наоборот: NaN там, где True
+
+
+# --- Series / DataFrame → ndarray ---
+s.to_numpy()               # ✅ принято: явно «дай массив»; не копирует, если можно
+s.to_numpy(dtype=float)    #    можно сразу привести тип
+np.array(s)                # ⚠️ работает, но ВСЕГДА копия и намерение читается хуже
+s.values                   # ❌ устарело: для некоторых типов вернёт НЕ ndarray
+
+features = df.drop(columns="target", errors="ignore")
+
+# массив длина кол-во строк в X из valude
+def predict(self, X: pd.DataFrame) -> np.ndarray:
+    return np.full(len(X), self.value)
+
+df.corrwith(df["target"], method="spearman") # series
+
+mi = mutual_info_classif(features, df["target"], random_state=0) # ndarray
+
+# |a - b| <= atol + rtol * |b|
+# По умолчанию rtol=1e-5 и atol=1e-8,
+
+std_maks = (np.isclose(std, 0.1, atol=0.1)
+            # atol - абсолютный допуск
+
+std_maks = (np.isclose(std, 0.1, rtol=0.01)
+            # rtol - долевой допуск
+
+frame = frame.rename(columns={"старое_имя": "новое_имя"})
+
 status = frame["health_status"]
 status.ne("dead")
 # != для цепочек
@@ -22,10 +70,10 @@ frame = pd.concat([counts.loc[~rare], rest], ignore_index=True)
 
 frame = df[[f"pc{i}" for i in range(1, pc_count+1)]]
 
-# len(df) — строки;
-# - len(df.columns) — колонки;
-# - df.shape — кортеж (строки, колонки), то есть (11, 11);
-# - df.size — всего клеток.
+len(df)          # строки
+len(df.columns)  # колонки
+df.shape         # кортеж (строки, колонки), то есть (11, 11)
+df.size          # всего клеток
 
 frame["cumulative"] = variance.cumsum()
 # трейловая сумма
@@ -40,11 +88,15 @@ profiles.insert(0, "count", counts)
 # остальные фичи сдвигаются
 # применяется in place
 
+# по смылу
+# axis=0 - результат снизу
+# axis=1 - результат справа
+
 # axis — это «вдоль какой оси работает операция». axis=0 — строки (вертикаль), axis=1 — колонки (горизонталь).
 #
-# - pd.concat([a, b], axis=0) — таблицы ставятся друг под друга, строк становится больше.  МОЖНО - axis="rows")
+pd.concat([a, b], axis=0)  # таблицы ставятся друг под друга, строк становится больше. МОЖНО - axis="rows"
 # Совмещаются по колонкам: одинаковые имена сойдутся, разные дадут NaN.
-# - pd.concat([a, b], axis=1) — таблицы ставятся бок о бок, колонок становится больше.  МОЖНО - axis="columns")
+pd.concat([a, b], axis=1)  # таблицы ставятся бок о бок, колонок становится больше. МОЖНО - axis="columns"
 # Совмещаются по индексу: строка с индексом 87118...a из первой таблицы встанет напротив такой же из второй.
 
 
@@ -144,8 +196,8 @@ df[~df.duplicated()]            # эквивалент df.drop_duplicates()
 
 
 
-# df.to_string
-# seried.tolist
+df.to_string
+seried.tolist
 # pandas функции
 
 
@@ -189,8 +241,8 @@ len(a)      # 3
 a.size      # 3
 a.shape     # (3,)
 
-s.size    5    # всего элементов, включая NaN
-s.count() 3    # только непустые значения
+s.size       # 5 — всего элементов, включая NaN
+s.count()    # 3 — только непустые значения
 
 m = np.array([[1, 2, 3],
               [4, 5, 6]])
@@ -211,6 +263,7 @@ df.head()      # первые строки - df
 df.to_string() # все показать
 df.shape       # (строк, столбцов) - tuple
 df.columns     # название колонок - возвращает Index - хитрый массив с хеш таблицей
+df.columns[mask]
 
 df.columns      # тип КАЖДОЙ колонки
 # dtype определяется СОДЕРЖИМЫМ:
@@ -226,7 +279,7 @@ df.sum()          # Series по колонкам
 df.sum().sum()    # одно число
 
 
-axis=k — это ось, которая исчезает. Работает для любой размерности:
+# axis=k — это ось, которая исчезает. Работает для любой размерности:
 a.shape          # (2, 3, 4)
 a.sum(axis=1)    # (2, 4)  ← тройка убралась
 df_copy = df_copy[~blank.any(axis=1)].copy()
@@ -256,6 +309,7 @@ threshold = counts.loc[counts["category"] == "Иной вид ДТП", "count"].
 
 df.iloc[5, 0]          # по ПОЗИЦИЯМ (строка, столбец)
 # базовая индексация int 0 -> n-1 может быть изменена но iloc всегда идет по дефолтной 0 1 ...
+df.iloc[124:]  # с 124 строки и до конца
 
 # Индекс = метки строк. После фильтрации становится дырявым: 0,3,7,12...
 filtered = df[df["price"] > 0].reset_index(drop=True)
@@ -292,19 +346,19 @@ prices = pd.to_numeric(df["price"], errors="coerce")
 
 pd.isna(a)
 # nan None NaT NA что угодно
-nan - numpy в pandas напечатет NaN принято nan
-NA и NaT - pandasi
-pd.NA - не привязан к float заменяем на него когда string
+# nan - numpy в pandas напечатет NaN принято nan
+# NA и NaT - pandasi
+# pd.NA - не привязан к float заменяем на него когда string
 
 np.nan   # float-колонки, numpy-массивы — классика
 pd.NA    # nullable-типы: Int64, string, boolean
 pd.NaT   # datetime
 None     # object-колонки, Python-код
 
-.str - строки
-# df["point_longitude"] = df["point"].str.get("long") применяем str чтобы обртится к dict
-.cat - категориональные данные
-.dt - дата время
+.str  # строки
+df["point_longitude"] = df["point"].str.get("long")  # применяем str чтобы обртится к dict
+.cat  # категориональные данные
+.dt   # дата время
 df_copy["year"] = df_copy["date"].dt.year
 df_copy["month"] = df_copy["date"].dt.month
 
@@ -369,16 +423,16 @@ report["price_range"] = report["max_price"] - report["min_price"]
 
 # ПИТОНОВСКОЕ        ЧТО ПРОИСХОДИТ                      АНАЛОГ PANDAS
 # ------------------------------------------------------------------------
-# x in s             ищет по ИНДЕКСУ, не по значениям    s.isin([...])
-# if s:              ValueError: ambiguous               s.any() / s.all() / s.empty
-# and / or / not     ValueError: ambiguous               &  |  ~   (+ скобки!)
-# len(df)            работает — число строк              df.shape[0] явнее
-# max(s), sum(s)     работают, но Python-цикл            s.max(), s.sum()
-# sorted(s)          вернёт list, потеряет индекс        s.sort_values()
-# str(s)             строка всего объекта                s.astype(str)
-# round(s, 2)        работает через __round__            s.round(2)
-# abs(s)             работает                            s.abs()
-# reversed(s)        не то                               s[::-1]
+x in s             # ищет по ИНДЕКСУ, не по значениям    s.isin([...])
+if s:              # ValueError: ambiguous               s.any() / s.all() / s.empty
+and / or / not     # ValueError: ambiguous               &  |  ~   (+ скобки!)
+len(df)            # работает — число строк              df.shape[0] явнее
+max(s), sum(s)     # работают, но Python-цикл            s.max(), s.sum()
+sorted(s)          # вернёт list, потеряет индекс        s.sort_values()
+str(s)             # строка всего объекта                s.astype(str)
+round(s, 2)        # работает через __round__            s.round(2)
+abs(s)             # работает                            s.abs()
+reversed(s)        # не то                               s[::-1]
 
 # Широкая таблица
 # Рынки превратились из значений колонки market в имена колонок. Одна строка = один месяц.
