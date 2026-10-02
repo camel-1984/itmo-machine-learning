@@ -1,6 +1,11 @@
 import pandas as pd
 import numpy as np
 
+# Estimator — любой объект sklearn, который учится на данных.
+
+X = X @ self.W_
+# @ здесь и есть проекция. Матричное умножение это скалярные произведения, посчитанные сразу для всех объектов.
+
 # --- numpy: маска vs массив номеров ---
 a = np.array([10, 20, 30])
 
@@ -21,6 +26,9 @@ df[df > 2]              # форма та же, строки не пропада
 df.where(df > 2, 0)     # то же, но False → 0 вместо NaN
 df.mask(df > 2)         # наоборот: NaN там, где True
 
+s[a,b]
+df[a,b,c]
+df[s] = df[a,b]
 
 # --- Series / DataFrame → ndarray ---
 s.to_numpy()               # ✅ принято: явно «дай массив»; не копирует, если можно
@@ -67,6 +75,7 @@ frame = inside.merge(
 
 frame = pd.concat([counts.loc[~rare], rest], ignore_index=True)
 # склеить
+# ignore_index - выбрасывает старые и делают новые 0 -> ...
 
 frame = df[[f"pc{i}" for i in range(1, pc_count+1)]]
 
@@ -194,13 +203,9 @@ df[~df.duplicated()]            # эквивалент df.drop_duplicates()
 # keep='first' (по умолчанию) | 'last' | False
 # subset — только у DataFrame
 
-
-
 df.to_string
-seried.tolist
+series.tolist
 # pandas функции
-
-
 
 # --- Series.unique() ---
 # Возвращает МАССИВ уникальных значений в порядке первого появления (без сортировки).

@@ -3,6 +3,13 @@ import pickle
 from functools import partial
 from pathlib import Path
 
+with threadpool_limits(limits=1):
+# ограничить потоки
+
+with tempfile.TemporaryDirectory() as tmp:
+    path = Path(tmp) / "model"
+# временная директория которая удалится после блоку with
+
 # ============================================================
 # *args И **kwargs (**params)
 # ============================================================
