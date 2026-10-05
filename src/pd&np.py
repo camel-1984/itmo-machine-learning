@@ -1,6 +1,10 @@
 import pandas as pd
 import numpy as np
 
+is_counting = (X["algorithm"] == "counting_sort").to_numpy()
+size = np.where(is_counting, X["n"] + X["value_range"], X["n"])
+# условие, если true, если false
+
 # Estimator — любой объект sklearn, который учится на данных.
 
 X = X @ self.W_
@@ -77,6 +81,12 @@ frame = pd.concat([counts.loc[~rare], rest], ignore_index=True)
 # склеить
 # ignore_index - выбрасывает старые и делают новые 0 -> ...
 
+X = np.hstack([X_num, X_cat])
+# склеивает numpy-массивы по горизонтали (добавляет столбцы), np.vstack - по вертикали (добавляет строки)
+# индексов и имён столбцов нет, строки склеиваются просто по позиции
+# число строк должно совпадать, иначе ValueError
+# аналог в pandas: pd.concat([a, b], axis=1), но он выравнивает по индексу
+
 frame = df[[f"pc{i}" for i in range(1, pc_count+1)]]
 
 len(df)          # строки
@@ -93,9 +103,14 @@ frame = pd.DataFrame(coords[:, :pc_count], columns=[f"pc{i}" for i in range(1, p
 X = df.drop(columns="count")
 
 profiles.insert(0, "count", counts)
-# Три аргумента: куда (индекс позиции), как назвать, что положить.
-# остальные фичи сдвигаются
-# применяется in place
+# insert(позиция, имя, значения) - вставляет колонку на нужную позицию, остальные сдвигаются вправо
+# работает in place, возвращает None (не писать profiles = profiles.insert(...))
+# если колонка с таким именем уже есть - ValueError (allow_duplicates=True чтобы разрешить)
+
+df = df.assign(resid=x)
+# assign(имя=значения) - добавляет колонку в конец, имя задается именем аргумента
+# то же, что df["resid"] = x, но возвращает новую копию, исходный df не меняется
+# можно передать функцию: df.assign(resid=lambda d: d.y - d.pred) - удобно в цепочках методов
 
 # по смылу
 # axis=0 - результат снизу
