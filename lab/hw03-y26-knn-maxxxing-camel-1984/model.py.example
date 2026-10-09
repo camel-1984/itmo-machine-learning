@@ -1,0 +1,27 @@
+"""Простой рабочий пример: KNN из sklearn и сохранение через pickle."""
+
+import pickle
+from pathlib import Path
+
+import pandas as pd
+from sklearn.neighbors import KNeighborsClassifier
+
+
+class Model:
+    def __init__(self) -> None:
+        self.knn = KNeighborsClassifier(n_neighbors=5)
+
+    def fit(self, X: pd.DataFrame, y: pd.Series) -> None:
+        self.knn.fit(X, y)
+
+    def predict(self, X: pd.DataFrame):
+        return self.knn.predict(X)
+
+    def save(self, path: Path) -> None:
+        with path.open("wb") as model_file:
+            pickle.dump(self, model_file)
+
+    @classmethod
+    def load(cls, path: Path) -> "Model":
+        with path.open("rb") as model_file:
+            return pickle.load(model_file)

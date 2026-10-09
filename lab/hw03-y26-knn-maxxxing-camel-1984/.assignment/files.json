@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "editable_files": [
+    "model.py"
+  ],
+  "additional_solution_files_allowed": true,
+  "protected_files": [
+    "README.md",
+    ".gitignore",
+    "requirements.txt"
+  ],
+  "protected_directories": [
+    ".assignment/",
+    ".github/",
+    "data/"
+  ]
+}
