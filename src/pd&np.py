@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+if not (np.isfinite(y_pred_nd).all() and
+                (y_pred_nd >= 0).all() and
+                (y_pred_nd <= 1).all()):
+
+# all сводит массив TF к одному bool
+
 is_counting = (X["algorithm"] == "counting_sort").to_numpy()
 size = np.where(is_counting, X["n"] + X["value_range"], X["n"])
 # условие, если true, если false
