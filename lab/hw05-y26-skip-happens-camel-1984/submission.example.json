@@ -1,0 +1,35 @@
+{
+  "careful": {
+    "features": [
+      "energy",
+      "duration_seconds",
+      "session_position"
+    ],
+    "max_depth": 4,
+    "min_samples_leaf": 30,
+    "threshold": 0.5,
+    "smoothing": 1
+  },
+  "rescue": {
+    "features": [
+      "energy",
+      "duration_seconds",
+      "session_position"
+    ],
+    "max_depth": 4,
+    "min_samples_leaf": 30,
+    "threshold": 0.5,
+    "smoothing": 1
+  },
+  "probability": {
+    "features": [
+      "energy",
+      "duration_seconds",
+      "session_position"
+    ],
+    "max_depth": 4,
+    "min_samples_leaf": 30,
+    "threshold": 0.5,
+    "smoothing": 1
+  }
+}

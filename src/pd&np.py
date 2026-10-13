@@ -1,6 +1,12 @@
 import pandas as pd
 import numpy as np
 
+p = np.clip(p, eps, 1 - eps)
+# - если p < eps, берём eps;
+# - если p > 1 - eps, берём 1 - eps;
+# - иначе p остаётся как есть.
+
+
 if not (np.isfinite(y_pred_nd).all() and
                 (y_pred_nd >= 0).all() and
                 (y_pred_nd <= 1).all()):

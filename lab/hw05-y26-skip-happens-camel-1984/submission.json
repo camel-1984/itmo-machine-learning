@@ -1,0 +1,56 @@
+{
+  "careful": {
+    "features": [
+      "track_genre",
+      "listening_context",
+      "energy",
+      "playlist_genre_0_share",
+      "playlist_genre_1_share",
+      "playlist_genre_2_share",
+      "playlist_genre_3_share",
+      "track_plays_7d",
+      "playlist_repeat_share",
+      "instrumentalness"
+    ],
+    "max_depth": 7,
+    "min_samples_leaf": 40,
+    "threshold": 0.62,
+    "smoothing": 0
+  },
+  "rescue": {
+    "features": [
+      "track_genre",
+      "listening_context",
+      "energy",
+      "playlist_genre_0_share",
+      "playlist_genre_1_share",
+      "playlist_genre_2_share",
+      "playlist_genre_3_share",
+      "track_plays_7d",
+      "playlist_repeat_share",
+      "instrumentalness"
+    ],
+    "max_depth": 6,
+    "min_samples_leaf": 80,
+    "threshold": 0.44,
+    "smoothing": 0
+  },
+  "probability": {
+    "features": [
+      "track_genre",
+      "listening_context",
+      "energy",
+      "playlist_genre_0_share",
+      "playlist_genre_1_share",
+      "playlist_genre_2_share",
+      "playlist_genre_3_share",
+      "track_plays_7d",
+      "playlist_repeat_share",
+      "instrumentalness"
+    ],
+    "max_depth": 6,
+    "min_samples_leaf": 80,
+    "threshold": 0.5,
+    "smoothing": 2
+  }
+}

@@ -3,6 +3,11 @@ import pickle
 from functools import partial
 from pathlib import Path
 
+def careful_metric(y_true, y_pred):
+    return fbeta(y_true, y_pred, beta=0.5)
+
+careful_metric = lambda y_true, y_pred: fbeta(y_true, y_pred, beta=0.5)
+
 # Когда ты пишешь model = cls() (то же самое, что Model()), Python делает два шага:
 #
 # 1. Model.__new__(Model) создаёт пустой объект. Именно __new__ возвращает экземпляр.
@@ -49,8 +54,12 @@ def g(a, b=0, *args, c, **kwargs): ...
 # округлить до знаков
 round(x, n)
 
-# вернуть первые k индексы после сортировки
+# вернуть первые k индексы если сортировка
 k_indices = argsort(distances)[:k]
+
+# вернуть индекс минимума
+i = np.argmin(q)
+
 
 # ============================================================
 # 1. ОПЕРАТОРЫ И ВЫРАЖЕНИЯ
